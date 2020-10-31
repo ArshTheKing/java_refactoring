@@ -1,11 +1,79 @@
 package refactoring;
 
+import javafx.geometry.Pos;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
 public class Rover {
 
+	private Heading heading;
+	private Position position;
+	private final Map<Order, Action> commands = new HashMap<>();
+
+	{
+		commands.put(Order.Forward, () -> this.position= this.position.forward(this.heading));
+		commands.put(Order.Backward, () -> this.position= this.position.backward(this.heading));
+		commands.put(Order.Right, () -> this.heading=this.heading.turnRight());
+		commands.put(Order.Left, () -> this.heading= this.heading.turnLeft());
+		commands.put(null,() -> this.heading=this.heading);
+	}
+
 	public Rover(String facing, int x, int y) {
+		this.heading=Heading.of(facing);
+		this.position = new Position(x, y);
 	}
 
 	public Rover(Heading heading, int x, int y) {
+		this.heading=heading;
+		this.position = new Position(x, y);
+	}
+
+	public Rover(Heading heading, Position startingPosition) {
+		this.heading=heading;
+		this.position = startingPosition;
+	}
+
+	public Heading heading() {
+		return this.heading;
+	}
+
+	public Position position() {
+		return this.position;
+	}
+
+	public void go(Order ... orders){
+		go(Arrays.stream(orders));
+	}
+
+	public void go(String instructions) {
+		go(Arrays.stream(instructions.split("")).map(Order::of));
+	}
+	public void go(Stream<Order> instructions) {
+		instructions.forEach(order -> commands.get(order).execute());
+	}
+
+
+	public interface Action{
+		void execute();
+	}
+
+	public enum Order{
+		Forward,Backward,Left,Right;
+		public static Order of(Character command){
+			if(command=='L') return Left;
+			if(command=='R') return Right;
+			if(command=='F') return Forward;
+			if(command=='B') return Backward;
+			return null;
+		}
+		public static Order of(String command){
+			return of(command.charAt(0));
+		}
+
 	}
 
 	public static class Position {
@@ -18,12 +86,17 @@ public class Rover {
 		}
 
 		public Position forward(Heading heading) {
-			if(heading.ordinal() % 2==0) return new Position(this.x, this.y - heading.ordinal() + 1);
+			if(isYAxis(heading)) return new Position(this.x, this.y - heading.ordinal() + 1);
 			else return new Position(this.x - heading.ordinal() + 2, this.y);
 		}
+
 		public Position backward(Heading heading) {
-			if(heading.ordinal() % 2==0) return new Position(this.x, this.y + heading.ordinal() - 1);
+			if(isYAxis(heading)) return new Position(this.x, this.y + heading.ordinal() - 1);
 			else return new Position(this.x + heading.ordinal() - 2, this.y);
+		}
+
+		private boolean isYAxis(Heading heading) {
+			return heading.ordinal() % 2==0;
 		}
 
 		@Override
@@ -57,20 +130,12 @@ public class Rover {
 			return null;
 		}
 
-		public Heading turnRight() {
-			return values()[add(+1)];
-		}
+		public Heading turnRight() { return values()[add(+1)]; }
 
-		public Heading turnLeft() {
-			return values()[add(-1)];
-		}
+		public Heading turnLeft() {	return values()[add(-1)]; }
 
-		private int add(int offset) {
-			return (this.ordinal() + offset + values().length) % values().length;
-		}
+		private int add(int offset) { return (this.ordinal() + offset + values().length) % values().length; }
 
 	}
-
-
 }
 
