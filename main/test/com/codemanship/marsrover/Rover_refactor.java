@@ -2,15 +2,22 @@ package com.codemanship.marsrover;
 
 import org.junit.Test;
 import refactoring.Rover;
-import refactoring.Rover.Position;
+import refactoring.viewpoints.SimpleViewPoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static refactoring.Rover.Heading.*;
-import static refactoring.Rover.Order.*;
-
+import static refactoring.Rover.*;
+//import refactoring.Rover.Position;
+//import static refactoring.Rover.Heading.*;
 
 public class Rover_refactor {
 
+    @Test
+    public void simple_view_rover(){
+        assertThat(new Rover(new SimpleViewPoint("North",new SimpleViewPoint.Position(0,0))).getView())
+                .isEqualTo(new SimpleViewPoint("North",new SimpleViewPoint.Position(0,0)));
+    }
+
+    /*
     @Test
     public void could_be_initialized_with_legacy_constructor() {
         assertThat(new Rover("N", 5, 5).heading()).isEqualTo(North);
@@ -78,5 +85,5 @@ public class Rover_refactor {
         rover.go("BL*FRF");
         assertThat(rover.heading()).isEqualTo(West);
         assertThat(rover.position()).isEqualTo(new Position(3,0));
-    }
+    }*/
 }
